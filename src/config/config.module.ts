@@ -8,10 +8,8 @@ import { ConfigService } from './config.service';
 @Global()
 @Module({})
 export class ConfigModule {
-  static async registerAsync(configFilePath: string): Promise<DynamicModule> {
-    const file = await fs.readFileSync(
-      path.join(__dirname, '../', configFilePath),
-    );
+  static register(configFilePath: string): DynamicModule {
+    const file = fs.readFileSync(path.join(__dirname, '../', configFilePath));
 
     const config = dotenv.parse(file);
 

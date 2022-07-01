@@ -15,9 +15,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     LogInterceptor,
     {
       provide: APP_INTERCEPTOR,
-      useExisting: LogInterceptor,
+      useClass: LogInterceptor,
     },
   ],
-  exports: [LogService],
+  exports: [],
 })
 export class LogModule {}

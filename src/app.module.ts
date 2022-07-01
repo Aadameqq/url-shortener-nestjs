@@ -6,18 +6,23 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { UserAccountModule } from './user-account/user-account.module';
 import { UrlsModule } from './urls/urls.module';
-import * as dotenv from 'dotenv';
-import * as path from 'path';
+import { ConfigService } from './config/config.service';
 
-dotenv.config({ path: path.join(__dirname, '../', '.development.env') });
+const CONFIG_FILE_PATH = '../.development.env';
 
 @Module({
   imports: [
-    ConfigModule.registerAsync('../.development.env'),
+    ConfigModule.register(CONFIG_FILE_PATH),
     LogModule,
-    MongooseModule.forRoot(process.env.MONGODB_URI),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule.register(CONFIG_FILE_PATH)],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
+    }),
     UserModule,
-    AuthModule.forRootAsync(),
+    AuthModule,
     UserAccountModule,
     UrlsModule,
   ],

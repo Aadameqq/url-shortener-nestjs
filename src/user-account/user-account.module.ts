@@ -4,6 +4,6 @@ import { AuthModule } from '../auth/auth.module';
 
 @Module({
   controllers: [UserAccountController],
-  imports: [AuthModule.forRootAsync()],
+  imports: [AuthModule],
 })
 export class UserAccountModule {}

@@ -10,7 +10,7 @@ import { UrlsRepository } from './urls.repository';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Url.name, schema: UrlSchema }]),
-    AuthModule.forRootAsync(),
+    AuthModule,
   ],
   controllers: [UrlsController],
   providers: [UrlsService, UrlsRepository],

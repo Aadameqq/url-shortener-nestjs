@@ -13,6 +13,8 @@ export class LogInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const now = Date.now();
 
+    console.log(1);
+
     return next
       .handle()
       .pipe(
