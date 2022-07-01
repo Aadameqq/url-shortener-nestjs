@@ -1,19 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Url } from './url.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { CAST_STRING_TO_OBJECT_ID_IF_VALID_PROVIDER } from '../common/cast-string-to-object-id-if-valid-provider.constant';
-import { castStringToObjectIdIfValid as castStringToObjectIdIfValidType } from '../common/cast-string-to-object-id-if-valid';
+import { toObjectId } from '../common/toObjectId';
 
 @Injectable()
 export class UrlsRepository {
-  constructor(
-    @InjectModel(Url.name) private urlModel,
-    @Inject(CAST_STRING_TO_OBJECT_ID_IF_VALID_PROVIDER)
-    private castStringToObjectIdIfValid: typeof castStringToObjectIdIfValidType,
-  ) {}
+  constructor(@InjectModel(Url.name) private urlModel) {}
 
   async readById(id: string): Promise<Url | null> {
-    const objectId = this.castStringToObjectIdIfValid(id);
+    const objectId = toObjectId(id);
 
     if (!objectId) return null;
 
@@ -25,7 +20,7 @@ export class UrlsRepository {
     await new this.urlModel(urlObject).save();
   }
   async incrementUseCountById(id: string) {
-    const objectId = this.castStringToObjectIdIfValid(id);
+    const objectId = toObjectId(id);
 
     if (!objectId) return null;
 

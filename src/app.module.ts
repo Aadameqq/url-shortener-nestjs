@@ -6,7 +6,6 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { UserAccountModule } from './user-account/user-account.module';
 import { UrlsModule } from './urls/urls.module';
-import { CommonModule } from './common/common.module';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -21,7 +20,6 @@ dotenv.config({ path: path.join(__dirname, '../', '.development.env') });
     AuthModule.forRootAsync(),
     UserAccountModule,
     UrlsModule,
-    CommonModule,
   ],
   providers: [],
 })
