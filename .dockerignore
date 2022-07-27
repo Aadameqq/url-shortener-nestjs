@@ -1,0 +1,9 @@
+node_modules
+*.env
+.gitignore
+.git
+*.md
+*.http
+dist
+.prettierrc
+test
