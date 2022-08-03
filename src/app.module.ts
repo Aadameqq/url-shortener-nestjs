@@ -7,7 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserAccountModule } from './user-account/user-account.module';
 import { RedirectModule } from './redirect/redirect.module';
 import { ConfigService } from './config/config.service';
-import { MapperModule } from './mapper/mapper.module';
+
 
 const CONFIG_FILE_PATH = '../.development.env';
 
@@ -26,7 +26,6 @@ const CONFIG_FILE_PATH = '../.development.env';
     AuthModule,
     UserAccountModule,
     RedirectModule,
-    MapperModule,
   ],
   providers: [],
 })
