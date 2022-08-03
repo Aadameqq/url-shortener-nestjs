@@ -1,7 +1,7 @@
 import { Prop, Schema } from '@nestjs/mongoose';
 
 @Schema()
-export class Url {
+export class Redirect {
   public id: string;
 
   @Prop()

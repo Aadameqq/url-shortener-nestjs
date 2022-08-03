@@ -1,6 +1,10 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class RedirectUrlDto {
+export class RedirectIdDto {
   @IsNotEmpty()
   public id: string;
+
+  constructor(id: string) {
+    this.id = id;
+  }
 }
