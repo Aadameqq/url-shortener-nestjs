@@ -7,10 +7,19 @@ import { AuthUser } from '../auth/auth-user.entity';
 import { Redirect } from './redirect.entity';
 import { RedirectUrlDto } from './dto/redirect-url.dto';
 import { RedirectDto } from './dto/redirect.dto';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @Controller('redirects')
+@ApiTags('Redirect')
 export class RedirectController {
   constructor(private urlsService: RedirectService) {}
+  @ApiOperation({ summary: 'Redirects to url with given id' })
+  @ApiParam({ description: 'Redirect id', name: 'id' })
   @Get('/:id')
   async read(@Param() redirectIdDto: RedirectIdDto): Promise<RedirectUrlDto> {
     const { id } = redirectIdDto;
@@ -19,6 +28,8 @@ export class RedirectController {
 
     return new RedirectUrlDto(url);
   }
+  @ApiBearerAuth('auth')
+  @ApiOperation({ summary: 'Creates new redirection' })
   @UseAuth()
   @Post()
   async create(
@@ -31,6 +42,8 @@ export class RedirectController {
     return new RedirectIdDto(id);
   }
 
+  @ApiBearerAuth('auth')
+  @ApiOperation({ summary: "Reads all user's redirects" })
   @UseAuth()
   @Get()
   async readAll(@GetAuthUser() user: AuthUser): Promise<RedirectDto[]> {

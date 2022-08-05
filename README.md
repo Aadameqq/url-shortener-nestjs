@@ -8,3 +8,6 @@ Change the mongodb uri, database name and jwt secret in the .development.env fil
 
 ##### or with docker
 `docker-compose up`
+
+##### Documentation
+`http://localhost:PORT/docs`
