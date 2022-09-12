@@ -1,16 +1,16 @@
 import { LogService } from './log.service';
-import { LogRepository } from './log.repository';
 import { Log } from './log.entity';
+import { Repository } from 'typeorm';
 
 describe('LogService', () => {
   let service: LogService;
 
   const logRepository = {
-    create: jest.fn(),
+    save: jest.fn(),
   };
 
   beforeEach(async () => {
-    service = new LogService(logRepository as unknown as LogRepository);
+    service = new LogService(logRepository as unknown as Repository<Log>);
   });
 
   describe('.create', () => {
@@ -22,7 +22,7 @@ describe('LogService', () => {
         expectedLogEntity.endpointUri,
       );
 
-      expect(logRepository.create).toBeCalledWith(expectedLogEntity);
+      expect(logRepository.save).toBeCalledWith(expectedLogEntity);
     });
   });
 });

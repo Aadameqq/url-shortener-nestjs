@@ -1,20 +1,22 @@
 import { Module } from '@nestjs/common';
 import { RedirectController } from './redirect.controller';
 import { RedirectService } from './redirect.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { RedirectSchema } from './redirect.schema';
 import { AuthModule } from '../auth/auth.module';
-import { RedirectRepository } from './redirect.repository';
 import { Redirect } from './redirect.entity';
+import { DatabaseModule } from '../database/database.module';
+import { REDIRECT_REPOSITORY } from './redirect.constants';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Redirect.name, schema: RedirectSchema },
-    ]),
+    DatabaseModule.forFeature({
+      entity: Redirect,
+      entityInjectionString: REDIRECT_REPOSITORY,
+    }),
     AuthModule,
+    UserModule,
   ],
   controllers: [RedirectController],
-  providers: [RedirectService, RedirectRepository],
+  providers: [RedirectService],
 })
 export class RedirectModule {}

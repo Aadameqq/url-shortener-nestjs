@@ -1,17 +1,20 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { LogSchema } from './log.schema';
-import { Log } from './log.entity';
 import { LogService } from './log.service';
-import { LogRepository } from './log.repository';
 import { LogInterceptor } from './log.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { DatabaseModule } from '../database/database.module';
+import { Log } from './log.entity';
+import { LOG_REPOSITORY } from './log.constants';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Log.name, schema: LogSchema }])],
+  imports: [
+    DatabaseModule.forFeature({
+      entity: Log,
+      entityInjectionString: LOG_REPOSITORY,
+    }),
+  ],
   providers: [
     LogService,
-    LogRepository,
     LogInterceptor,
     {
       provide: APP_INTERCEPTOR,

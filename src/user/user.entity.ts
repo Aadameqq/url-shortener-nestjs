@@ -1,18 +1,26 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Redirect } from '../redirect/redirect.entity';
 
-@Schema()
+@Entity()
 export class User {
+  @PrimaryGeneratedColumn('uuid')
   public id: string;
 
-  @Prop()
+  @Column()
   public username: string;
 
-  @Prop()
-  public password: string;
+  @Column()
+  password: string;
 
-  constructor(id: string, username: string, password: string) {
-    this.id = id;
+  @OneToMany(() => Redirect, (redirect) => redirect.owner, { cascade: true })
+  redirects: Redirect[];
+
+  constructor(username: string, password: string) {
     this.username = username;
     this.password = password;
   }
+
+  addRedirect = (redirect: Redirect) => {
+    this.redirects.push(redirect);
+  };
 }

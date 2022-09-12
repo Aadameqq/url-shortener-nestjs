@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { AuthUser } from './auth-user.entity';
+import { User } from '../user/user.entity';
 
 export const GetAuthUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
@@ -7,6 +7,6 @@ export const GetAuthUser = createParamDecorator(
 
     if (!authUser) throw new Error('Auth user does not exist');
 
-    return authUser as AuthUser;
+    return authUser as User;
   },
 );

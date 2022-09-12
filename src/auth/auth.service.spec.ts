@@ -1,10 +1,9 @@
 import { AuthService } from './auth.service';
 import { User } from '../user/user.entity';
-import { UserRepository } from '../user/user.repository';
 import { IPasswordHasher } from './interfaces/password-hasher.interface';
 import { TokenManager } from './token-manager';
 import { UnauthorizedException } from '@nestjs/common';
-import { AuthUser } from './auth-user.entity';
+import { Repository } from 'typeorm';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -15,12 +14,13 @@ describe('AuthService', () => {
   const testToken = 'sdfsdfsdfsdfsfffff';
   const testId = 'id';
 
-  const testUser = new User(testId, testUsername, testHash);
-  const testAuthUser = new AuthUser(testId, testUsername);
+  const testUser = new User(testUsername, testHash);
+  testUser.id = testId;
 
   const userRepository = {
-    findByUsername: jest.fn().mockImplementation(() => testUser),
-    create: jest.fn(),
+    findOneBy: jest.fn().mockImplementation(() => testUser),
+    findOne: jest.fn().mockImplementation(() => testUser),
+    save: jest.fn(),
   };
 
   const passwordHasher = {
@@ -30,15 +30,18 @@ describe('AuthService', () => {
 
   const tokenManager = {
     createToken: jest.fn().mockImplementation(() => testToken),
-    validateTokenAndFetchData: jest.fn().mockImplementation(() => testAuthUser),
+    validateTokenAndFetchData: jest.fn().mockImplementation(() => ({
+      id: testId,
+    })),
   };
 
   beforeEach(async () => {
     service = new AuthService(
       passwordHasher as unknown as IPasswordHasher,
-      userRepository as unknown as UserRepository,
+      userRepository as unknown as Repository<User>,
       tokenManager as unknown as TokenManager,
     );
+    jest.clearAllMocks();
   });
 
   describe('.loginUserAndGetToken', () => {
@@ -49,18 +52,20 @@ describe('AuthService', () => {
       return await service.loginUserAndGetToken(username, password);
     };
 
-    it('Should call user repository findByUsername method with given username as parameter', async () => {
+    it('Should call search for user with given username in database', async () => {
       await callLoginUserAndGetTokenMethod();
 
-      expect(userRepository.findByUsername).toBeCalledWith(testUsername);
+      expect(userRepository.findOneBy).toBeCalledWith({
+        username: testUsername,
+      });
     });
     it('Should throw UnauthorizedException When user does not exist', async () => {
-      userRepository.findByUsername.mockImplementationOnce(() => null);
+      userRepository.findOneBy.mockImplementationOnce(() => null);
       expect(callLoginUserAndGetTokenMethod()).rejects.toThrow(
         new UnauthorizedException(),
       );
     });
-    it('Should call passwordHasher compare method with given password and hash returned from repository', async () => {
+    it('Should compare given password with password found in database', async () => {
       await callLoginUserAndGetTokenMethod();
 
       expect(passwordHasher.compare).toBeCalledWith(testPassword, testHash);
@@ -72,11 +77,11 @@ describe('AuthService', () => {
         new UnauthorizedException(),
       );
     });
-    it('Should call tokenManager createToken method with user id', async () => {
+    it('Should create a token for user', async () => {
       await callLoginUserAndGetTokenMethod();
 
       expect(tokenManager.createToken).toBeCalledWith(
-        { id: testId, username: testUsername },
+        { id: testId },
         expect.anything(),
       );
     });
@@ -92,7 +97,7 @@ describe('AuthService', () => {
       return await service.registerUser(testUsername, testPassword);
     };
 
-    it('Should call passwordHasher hash method with password given as argument', async () => {
+    it('Should hash given password', async () => {
       await callRegisterUserMethod();
 
       expect(passwordHasher.hash).toBeCalledWith(
@@ -101,11 +106,14 @@ describe('AuthService', () => {
       );
     });
 
-    it('Should run userRepository create method with user entity instance with given name and hash returned from hasher', async () => {
+    it('Should save user to database with given username and hashed password', async () => {
       await callRegisterUserMethod();
 
-      expect(userRepository.create).toBeCalledWith(
-        new User(undefined, testUsername, testHash),
+      expect(userRepository.save).toBeCalledWith(
+        expect.objectContaining({
+          username: testUsername,
+          password: testHash,
+        }),
       );
     });
     it('Should return true', async () => {
@@ -117,18 +125,19 @@ describe('AuthService', () => {
 
   describe('.fetchAuthUserIfValid', () => {
     const callFetchAuthUserIfValid = async (token = testToken) => {
-      return await service.fetchAuthUserIfValid(token);
+      return await service.fetchUserIfValid(token);
     };
     it('Should return false When token is empty', async () => {
       const result = await callFetchAuthUserIfValid('');
 
       expect(result).toBe(false);
     });
-    it('Should call tokenManager validateTokenAndFetchData method with given token When token is not empty', async () => {
+    it('Should call tokenManager validate and fetch data from given token When token is not empty', async () => {
       await callFetchAuthUserIfValid();
 
       expect(tokenManager.validateTokenAndFetchData).toBeCalledWith(testToken);
     });
+
     it('Should return false When token is invalid', async () => {
       tokenManager.validateTokenAndFetchData.mockImplementationOnce(
         () => false,
@@ -137,10 +146,18 @@ describe('AuthService', () => {
 
       expect(result).toBe(false);
     });
-    it('Should return authUser returned by tokenManager When token is valid', async () => {
+    it("Should search for a user with id from token and user's redirects When token is valid", async () => {
+      await callFetchAuthUserIfValid();
+
+      expect(userRepository.findOne).toBeCalledWith({
+        where: { id: testId },
+        relations: { redirects: true },
+      });
+    });
+    it('Should return user found in database When token is valid', async () => {
       const result = await callFetchAuthUserIfValid();
 
-      expect(result).toBe(testAuthUser);
+      expect(result).toBe(testUser);
     });
   });
 });

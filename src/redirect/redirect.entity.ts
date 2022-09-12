@@ -1,22 +1,23 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '../user/user.entity';
 
-@Schema()
+@Entity()
 export class Redirect {
+  @PrimaryGeneratedColumn('uuid')
   public id: string;
 
-  @Prop()
+  @Column()
   public url: string;
 
-  @Prop()
-  public ownerId: string;
+  @ManyToOne(() => User, (user) => user.redirects, { onDelete: 'CASCADE' })
+  public owner: User;
 
-  @Prop({ default: 0 })
+  @Column({ default: 0 })
   public useCount: number;
 
-  constructor(id, url, ownerId, useCount = 0) {
-    this.id = id;
+  constructor(url: string, owner: User, useCount = 0) {
     this.url = url;
-    this.ownerId = ownerId;
+    this.owner = owner;
     this.useCount = useCount;
   }
 }

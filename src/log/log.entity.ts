@@ -1,11 +1,14 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Schema()
+@Entity()
 export class Log {
-  @Prop()
-  public endpointUri: string;
-  @Prop()
-  public timeInMilliseconds: number;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  endpointUri: string;
+  @Column()
+  timeInMilliseconds: number;
 
   constructor(endpointUri, timeInMilliseconds) {
     this.endpointUri = endpointUri;

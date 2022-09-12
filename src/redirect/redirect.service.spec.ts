@@ -1,26 +1,31 @@
 import { RedirectService } from './redirect.service';
-import { RedirectRepository } from './redirect.repository';
 import { Redirect } from './redirect.entity';
 import { NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { User } from '../user/user.entity';
 
 describe('UrlsService', () => {
   let service: RedirectService;
 
   const testId = 'id';
   const testUrl = 'url';
-  const testOwnerId = 'ownerid';
-  const testRedirect = new Redirect(testId, testUrl, testOwnerId);
+  const testOwner = new User('usrname', 'passwd');
+  testOwner.redirects = [];
+  const testRedirect = new Redirect(testUrl, testOwner);
 
   const redirectRepository = {
-    readById: jest.fn().mockImplementation(() => testRedirect),
-    incrementUseCountById: jest.fn(),
-    create: jest.fn().mockImplementation(() => testRedirect),
-    readAllByOwnerId: jest.fn().mockImplementation(() => [testRedirect]),
+    findOneBy: jest.fn().mockImplementation(() => testRedirect),
+    save: jest.fn(),
+  };
+
+  const userRepository = {
+    save: jest.fn(),
   };
 
   beforeEach(async () => {
     service = new RedirectService(
-      redirectRepository as unknown as RedirectRepository,
+      redirectRepository as unknown as Repository<Redirect>,
+      userRepository as unknown as Repository<User>,
     );
   });
 
@@ -32,17 +37,22 @@ describe('UrlsService', () => {
     it('Should call redirectRepository readById method with given as parameter id', async () => {
       await callGetUrlById();
 
-      expect(redirectRepository.readById).toBeCalledWith(testId);
+      expect(redirectRepository.findOneBy).toBeCalledWith({ id: testId });
     });
     it('Should throw NotFound exception when redirect does not exist', () => {
-      redirectRepository.readById.mockImplementationOnce(() => false);
+      redirectRepository.findOneBy.mockImplementationOnce(() => false);
 
       expect(callGetUrlById).rejects.toThrow(new NotFoundException());
     });
-    it('Should call redirectRepository incrementUseCountById method with id given as parameter', async () => {
+    it('Should call redirectRepository save method with id given as parameter', async () => {
       await callGetUrlById();
 
-      expect(redirectRepository.incrementUseCountById).toBeCalledWith(testId);
+      const expectedRedirect = {
+        ...testRedirect,
+        useCount: 1,
+      };
+
+      expect(redirectRepository.save).toBeCalledWith(expectedRedirect);
     });
     it('Should return url from repository When redirect exists', async () => {
       const result = await callGetUrlById();
@@ -53,35 +63,23 @@ describe('UrlsService', () => {
 
   describe('.create', () => {
     const callCreate = async () => {
-      return await service.create(testRedirect);
+      return await service.create(testOwner, testRedirect);
     };
 
-    it('Should call redirectRepository create method with given redirects entity instance', async () => {
+    it('Should call userRepository save method with user with given redirect added to redirects array ', async () => {
       await callCreate();
 
-      expect(redirectRepository.create).toBeCalledWith(testRedirect);
+      const expectedUser = {
+        ...testOwner,
+        redirects: [testRedirect],
+      };
+
+      expect(userRepository.save).toBeCalledWith(expectedUser);
     });
     it('Should return created redirect', async () => {
       const result = await callCreate();
 
       expect(result).toEqual(testRedirect);
-    });
-  });
-
-  describe('.readAllByOwnerId', () => {
-    const callReadAllByOwnerId = async () => {
-      return await service.readAllByOwnerId(testOwnerId);
-    };
-
-    it('Should call redirectRepository readAllByOwnerId with ownerId given as parameter', async () => {
-      await callReadAllByOwnerId();
-
-      expect(redirectRepository.readAllByOwnerId).toBeCalledWith(testOwnerId);
-    });
-    it('Should return redirects array from repository', async () => {
-      const result = await callReadAllByOwnerId();
-
-      expect(result).toEqual([testRedirect]);
     });
   });
 });
