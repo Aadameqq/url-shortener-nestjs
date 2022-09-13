@@ -4,7 +4,6 @@ import { AuthService } from './auth.service';
 import { TokenManager } from './token-manager';
 import { PASSWORD_HASHER_PROVIDER } from './auth.constants';
 import { UserModule } from '../user/user.module';
-import { ConfigModule } from '../config/config.module';
 import * as bcrypt from 'bcrypt';
 
 @Module({
@@ -17,7 +16,7 @@ import * as bcrypt from 'bcrypt';
     TokenManager,
     AuthService,
   ],
-  imports: [UserModule, ConfigModule],
+  imports: [UserModule],
   exports: [TokenManager, AuthService],
 })
 export class AuthModule {}

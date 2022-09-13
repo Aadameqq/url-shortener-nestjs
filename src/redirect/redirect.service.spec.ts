@@ -4,7 +4,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 
-describe('UrlsService', () => {
+describe('RedirectsService', () => {
   let service: RedirectService;
 
   const testId = 'id';
@@ -27,6 +27,7 @@ describe('UrlsService', () => {
       redirectRepository as unknown as Repository<Redirect>,
       userRepository as unknown as Repository<User>,
     );
+    jest.clearAllMocks();
   });
 
   describe('.getUrlById', () => {

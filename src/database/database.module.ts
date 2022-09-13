@@ -1,8 +1,10 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { databaseProviders } from './database.providers';
 import { DataSource } from 'typeorm';
+import { ConfigModule } from '../config/config.module';
 
 @Module({
+  imports: [ConfigModule.register()],
   providers: [...databaseProviders],
   exports: [],
 })

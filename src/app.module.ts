@@ -6,11 +6,9 @@ import { AuthModule } from './auth/auth.module';
 import { UserAccountModule } from './user-account/user-account.module';
 import { RedirectModule } from './redirect/redirect.module';
 
-const CONFIG_FILE_PATH = '../.development.env';
-
 @Module({
   imports: [
-    ConfigModule.register(CONFIG_FILE_PATH),
+    ConfigModule.register(),
     LogModule,
     AuthModule,
     UserAccountModule,

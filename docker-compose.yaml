@@ -4,22 +4,29 @@ services:
   web:
     build: .
     links:
-      - mongo
+      - mysql
     depends_on:
-      - mongo
+      - mysql
     ports:
       - 3000:3000
     environment:
-      - MONGODB_URI=mongodb://mongo:27017
-      - DATABASE_NAME=urlshortener
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_NAME=urlshortener
       - JWT_SECRET=your-secret
-  mongo:
-    image: mongo
+    restart: on-failure
+  mysql:
+    image: mysql
     ports:
-      - 27017:27017
+      - 3306:3306
     volumes:
-      - mongodb-data:/data/db
+      - urlshortener-db:/etc/mysql/conf.d
+    environment:
+      - MYSQL_DATABASE=urlshortener
+      - MYSQL_ROOT_PASSWORD=password
 volumes:
-  mongodb-data:
+  urlshortener-db:
 
 
